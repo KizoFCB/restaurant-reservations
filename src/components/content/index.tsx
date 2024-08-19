@@ -1,8 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Box from "@mui/material/Box";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
-import reservationsList from "../../services/serverResponse.json";
 import { Stack, Tooltip, Typography } from "@mui/material";
+
+import Filters from "../filters";
+import reservationsList from "../../services/serverResponse.json";
+import dayjs from "dayjs";
 
 const Content: React.FC = () => {
   const [rows, setRows] = useState<(typeof reservationsList)["reservations"]>();
@@ -102,6 +105,86 @@ const Content: React.FC = () => {
     []
   );
 
+  const [filters, setFilters] = useState<{
+    status: string;
+    date: string;
+    shift: string;
+    area: string;
+    name: string;
+  }>({
+    status: "",
+    date: "",
+    shift: "",
+    area: "",
+    name: "",
+  });
+
+  const handleFilterChange = useCallback((value: string, key: string) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  }, []);
+
+  const findNameSplitSearch = useCallback(
+    (
+      searchValue: string,
+      item: { customer: { firstName: string; lastName: string } }
+    ) => {
+      let found = false;
+
+      const nameSplits = searchValue.split(" ");
+
+      if (nameSplits?.length === 1) {
+        found =
+          item?.customer?.firstName
+            .toLowerCase()
+            .startsWith(searchValue?.toLowerCase()) ||
+          item?.customer?.lastName
+            .toLowerCase()
+            .startsWith(searchValue?.toLowerCase());
+      } else if (nameSplits?.length === 2) {
+        found = `${item?.customer?.firstName} ${item?.customer?.lastName}`
+          .toLowerCase()
+          .startsWith(searchValue?.toLowerCase());
+      }
+
+      return found;
+    },
+    []
+  );
+
+  // Memoize the filtered data for efficiency
+  const filteredRows = useMemo(() => {
+    return rows?.filter((item) => {
+      const matchesSearch = filters?.name
+        ? findNameSplitSearch(filters?.name, item)
+        : true;
+
+      const matchesStatus = filters?.status
+        ? item?.status === filters?.status
+        : true;
+
+      const matchesDate = filters?.date
+        ? dayjs(item?.businessDate?.replace(".", "/"), "DD/MM/YYYY").isSame(
+            dayjs(filters?.date),
+            "day"
+          )
+        : true;
+
+      const matchesShift = filters?.shift
+        ? item?.shift === filters?.shift
+        : true;
+
+      const matchesArea = filters?.area ? item?.area === filters?.area : true;
+
+      return (
+        matchesStatus &&
+        matchesShift &&
+        matchesArea &&
+        matchesSearch &&
+        matchesDate
+      );
+    });
+  }, [filters, rows]);
+
   useEffect(
     () =>
       setRows(
@@ -124,8 +207,8 @@ const Content: React.FC = () => {
         <Typography variant="h4" gutterBottom marginBlock="16px">
           Welcome to the restaurant reservations!
         </Typography>
-        {/* <Filters /> */}
-        <DataGrid disableColumnMenu rows={rows} columns={columns} />
+        <Filters filters={filters} handleFilterChange={handleFilterChange} />
+        <DataGrid disableColumnMenu rows={filteredRows} columns={columns} />
       </Stack>
     </Box>
   );
