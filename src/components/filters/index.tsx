@@ -1,5 +1,7 @@
+import dayjs from "dayjs";
 import {
   Box,
+  Button,
   FormControl,
   InputLabel,
   MenuItem,
@@ -10,7 +12,6 @@ import {
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import dayjs from "dayjs";
 
 interface IFiltersProps {
   filters: {
@@ -21,13 +22,18 @@ interface IFiltersProps {
     name: string;
   };
   handleFilterChange: (value: string, key: string) => void;
+  clearFilters: () => void;
 }
 
-const Filters = ({ filters, handleFilterChange }: IFiltersProps) => {
+const Filters = ({
+  filters,
+  handleFilterChange,
+  clearFilters,
+}: IFiltersProps) => {
   return (
-    <Stack flexDirection="row" gap="24px" marginBlock="32px">
+    <Stack flexDirection="row" gap="24px" marginBlock="32px" flexWrap="wrap">
       <Box sx={{ minWidth: 120 }}>
-        <FormControl fullWidth>
+        <FormControl fullWidth color="primary">
           <InputLabel id="demo-simple-select-label-status">Status</InputLabel>
           <Select
             labelId="demo-simple-select-label-status"
@@ -101,6 +107,14 @@ const Filters = ({ filters, handleFilterChange }: IFiltersProps) => {
           handleFilterChange(event.target.value, "name");
         }}
       />
+
+      <Button
+        variant="contained"
+        onClick={clearFilters}
+        sx={{ textTransform: "capitalize" }}
+      >
+        Clear Filters
+      </Button>
     </Stack>
   );
 };

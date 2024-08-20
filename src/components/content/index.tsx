@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+
+import dayjs from "dayjs";
 import Box from "@mui/material/Box";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { Stack, Tooltip, Typography } from "@mui/material";
 
 import Filters from "../filters";
 import reservationsList from "../../services/serverResponse.json";
-import dayjs from "dayjs";
 
 const Content: React.FC = () => {
   const [rows, setRows] = useState<(typeof reservationsList)["reservations"]>();
@@ -123,6 +124,16 @@ const Content: React.FC = () => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   }, []);
 
+  const clearFilters = useCallback(() => {
+    setFilters({
+      status: "",
+      date: "",
+      shift: "",
+      area: "",
+      name: "",
+    });
+  }, []);
+
   const findNameSplitSearch = useCallback(
     (
       searchValue: string,
@@ -207,8 +218,20 @@ const Content: React.FC = () => {
         <Typography variant="h4" gutterBottom marginBlock="16px">
           Welcome to the restaurant reservations!
         </Typography>
-        <Filters filters={filters} handleFilterChange={handleFilterChange} />
-        <DataGrid disableColumnMenu rows={filteredRows} columns={columns} />
+        <Filters
+          filters={filters}
+          handleFilterChange={handleFilterChange}
+          clearFilters={clearFilters}
+        />
+        <DataGrid
+          disableColumnMenu
+          rows={filteredRows}
+          columns={columns}
+          pageSizeOptions={[5, 10, 20]}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 5 } },
+          }}
+        />
       </Stack>
     </Box>
   );

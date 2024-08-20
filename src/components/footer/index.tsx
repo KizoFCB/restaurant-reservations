@@ -1,4 +1,5 @@
 import React from "react";
+
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
@@ -10,9 +11,7 @@ const Footer: React.FC = () => {
         backgroundColor: "primary.main",
         color: "white",
         padding: "10px",
-        position: "fixed",
         width: "100%",
-        bottom: 0,
         textAlign: "center",
       }}
     >
