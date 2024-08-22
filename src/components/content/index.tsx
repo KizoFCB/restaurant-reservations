@@ -3,12 +3,21 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import Box from "@mui/material/Box";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
-import { Stack, Tooltip, Typography } from "@mui/material";
+import {
+  Stack,
+  Tooltip,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 
 import Filters from "../filters";
 import reservationsList from "../../services/serverResponse.json";
 
 const Content: React.FC = () => {
+  const theme = useTheme();
+  const isMd = useMediaQuery(theme.breakpoints.down("md"));
+
   const [rows, setRows] = useState<(typeof reservationsList)["reservations"]>();
   const columns: GridColDef[] = useMemo(
     () => [
@@ -226,7 +235,16 @@ const Content: React.FC = () => {
         <DataGrid
           disableColumnMenu
           rows={filteredRows}
-          columns={columns}
+          columns={columns?.filter((column) => {
+            if (
+              column?.field === "id" ||
+              column?.field === "businessDate" ||
+              column?.field === "customer"
+            ) {
+              return true;
+            }
+            return !isMd;
+          })}
           pageSizeOptions={[5, 10, 20]}
           initialState={{
             pagination: { paginationModel: { pageSize: 5 } },
